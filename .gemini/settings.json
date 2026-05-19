@@ -1,10 +1,9 @@
 {
     "mcpServers": {
         "laravel-boost": {
-            "command": "wsl.exe",
+            "command": "vendor/bin/sail",
             "args": [
-                "/usr/bin/php8.4",
-                "/home/aluisio/Code/testes/teste-tecnico/artisan",
+                "artisan",
                 "boost:mcp"
             ]
         }
