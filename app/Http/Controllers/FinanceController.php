@@ -74,7 +74,12 @@ final class FinanceController extends Controller
 
         $action->execute($user, Money::fromDecimal($amount));
 
-        return back()->with('status', 'Deposit successful!');
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => "Deposit of R$ {$amount} requested successfully!",
+        ]);
+
+        return back();
     }
 
     public function transfer(TransferRequest $request, TransferMoneyAction $action): RedirectResponse
@@ -86,7 +91,7 @@ final class FinanceController extends Controller
         /** @var float|int|string $amount */
         $amount = $request->validated('amount');
 
-        $toUser = User::where('email', $email)->firstOrFail();
+        $toUser = User::query()->where('email', $email)->firstOrFail();
 
         try {
             $action->execute($user, $toUser, Money::fromDecimal($amount));
@@ -94,7 +99,12 @@ final class FinanceController extends Controller
             return back()->withErrors(['amount' => $e->getMessage()]);
         }
 
-        return back()->with('status', 'Transfer successful!');
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => "Transfer of R$ {$amount} to {$toUser->name} requested successfully!",
+        ]);
+
+        return back();
     }
 
     public function reverse(Subledger $subledger, ReverseTransactionAction $action): RedirectResponse
@@ -107,6 +117,11 @@ final class FinanceController extends Controller
             return back()->withErrors(['error' => $e->getMessage()]);
         }
 
-        return back()->with('status', 'Transaction reversed successful!');
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Transaction reversal requested successfully!',
+        ]);
+
+        return back();
     }
 }

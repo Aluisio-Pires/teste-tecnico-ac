@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm, usePage } from '@inertiajs/vue3';
-import { Building, Wallet, Eye, EyeOff } from 'lucide-vue-next';
+import { Building, Wallet, Eye, EyeOff, CheckCircle2, Loader2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,7 @@ defineOptions({
 const page = usePage();
 const user = page.props.auth.user;
 const isBalanceVisible = ref(true);
+const showSuccess = ref(false);
 
 const toggleBalance = () => {
     isBalanceVisible.value = !isBalanceVisible.value;
@@ -30,8 +31,8 @@ const toggleBalance = () => {
 
 const formatCurrency = (value: number) => {
     if (!isBalanceVisible.value) {
-return 'R$ ••••••';
-}
+        return 'R$ ••••••';
+    }
 
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 };
@@ -42,7 +43,13 @@ const form = useForm({
 
 const submit = () => {
     form.post(finance.deposit(), {
-        onSuccess: () => form.reset(),
+        onSuccess: () => {
+            form.reset();
+            showSuccess.value = true;
+            setTimeout(() => {
+                showSuccess.value = false;
+            }, 5000);
+        },
     });
 };
 </script>
@@ -51,7 +58,7 @@ const submit = () => {
     <Head title="Deposit Money" />
 
     <div class="flex h-full flex-1 flex-col items-center justify-center gap-6 p-4">
-        <Card class="w-full max-w-md">
+        <Card class="w-full max-w-md transition-all duration-300" :class="{ 'opacity-50 scale-95': showSuccess }">
             <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle class="text-sm font-medium">Current Balance</CardTitle>
                 <div class="flex items-center gap-2">
@@ -67,7 +74,20 @@ const submit = () => {
             </CardContent>
         </Card>
 
-        <Card class="w-full max-w-md">
+        <Card class="relative w-full max-w-md overflow-hidden transition-all duration-300">
+            <!-- Success Overlay -->
+            <div 
+                v-if="showSuccess" 
+                class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/90 text-center backdrop-blur-sm dark:bg-black/90"
+            >
+                <CheckCircle2 class="mb-4 h-16 w-16 text-green-500 animate-in zoom-in duration-300" />
+                <h3 class="text-xl font-bold">Deposit Requested!</h3>
+                <p class="mt-2 text-sm text-muted-foreground">Your transaction is being processed.</p>
+                <Button variant="outline" class="mt-6" @click="showSuccess = false">
+                    Make another deposit
+                </Button>
+            </div>
+
             <CardHeader>
                 <CardTitle>Deposit Money</CardTitle>
                 <CardDescription>Add funds to your account securely.</CardDescription>
@@ -85,17 +105,23 @@ const submit = () => {
                                 placeholder="0,00"
                                 class="pl-9"
                                 v-model="form.amount"
+                                :disabled="form.processing"
                                 autofocus
                             />
                         </div>
                         <InputError :message="form.errors.amount" />
                     </div>
                     <Button type="submit" class="w-full" :disabled="form.processing">
-                        Confirm Deposit
+                        <template v-if="form.processing">
+                            <Loader2 class="mr-2 h-4 w-4 animate-spin" />
+                            Processing...
+                        </template>
+                        <template v-else>
+                            Confirm Deposit
+                        </template>
                     </Button>
                 </form>
             </CardContent>
         </Card>
     </div>
 </template>
-
