@@ -53,7 +53,8 @@ test('transaction can be reversed', function (): void {
     $amount = Money::fromDecimal(100);
 
     $depositAction = new DepositMoneyAction();
-    $ledger = $depositAction->execute($user, $amount);
+    $depositAction->execute($user, $amount);
+    $ledger = $user->refresh()->ledgers()->latest()->first();
     $subledger = $ledger->subledger;
 
     expect($user->refresh()->balance->toDecimal())->toBe(100.0);
@@ -89,7 +90,8 @@ test('cannot reverse a reversal', function (): void {
     $amount = Money::fromDecimal(100);
 
     $depositAction = new DepositMoneyAction();
-    $ledger = $depositAction->execute($user, $amount);
+    $depositAction->execute($user, $amount);
+    $ledger = $user->refresh()->ledgers()->latest()->first();
     $subledger = $ledger->subledger;
 
     (new ReverseTransactionAction())->execute($subledger);
@@ -105,7 +107,8 @@ test('cannot reverse same transaction twice', function (): void {
     $amount = Money::fromDecimal(100);
 
     $depositAction = new DepositMoneyAction();
-    $ledger = $depositAction->execute($user, $amount);
+    $depositAction->execute($user, $amount);
+    $ledger = $user->refresh()->ledgers()->latest()->first();
     $subledger = $ledger->subledger;
 
     (new ReverseTransactionAction())->execute($subledger);
@@ -248,10 +251,11 @@ test('user can reverse their own transfer', function (): void {
 
 test('user can reverse their own deposit', function (): void {
     $user = User::factory()->create();
-    $ledger = (new DepositMoneyAction())->execute($user, Money::fromDecimal(500));
+    (new DepositMoneyAction())->execute($user, Money::fromDecimal(500));
+    $subledger = $user->refresh()->ledgers()->latest()->first()->subledger;
 
     $this->actingAs($user);
-    $response = $this->post(route('finance.reverse', $ledger->subledger));
+    $response = $this->post(route('finance.reverse', $subledger));
 
     $response->assertRedirect();
     expect($user->refresh()->balance->toDecimal())->toBe(0.0);
@@ -259,10 +263,10 @@ test('user can reverse their own deposit', function (): void {
 
 test('reversal catch block in controller', function (): void {
     $user = User::factory()->create();
-    $ledger = (new DepositMoneyAction())->execute($user, Money::fromDecimal(500));
+    (new DepositMoneyAction())->execute($user, Money::fromDecimal(500));
+    $subledger = $user->refresh()->ledgers()->latest()->first()->subledger;
 
     // Simulate already reversed but bypass policy if possible or just use a mock
-    $subledger = $ledger->subledger;
     (new ReverseTransactionAction())->execute($subledger);
 
     $this->actingAs($user);
