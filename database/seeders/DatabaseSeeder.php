@@ -15,7 +15,7 @@ final class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleAndPermissionSeeder::class,
-            FinancialSeeder::class,
+            // FinancialSeeder::class,
         ]);
     }
 }
