@@ -17,6 +17,8 @@ final class TransferMoneyAction
             throw new InvalidArgumentException('Cannot transfer money to the same account.');
         }
 
+        $from->loadMissing('latestLedger');
+
         if ($from->balance->microns < $amount->microns) {
             throw new InvalidArgumentException('Insufficient balance.');
         }

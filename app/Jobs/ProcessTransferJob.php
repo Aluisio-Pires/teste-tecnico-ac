@@ -37,7 +37,7 @@ final class ProcessTransferJob implements ShouldQueue
             $userIds = [$this->from->id, $this->to->id];
             sort($userIds);
 
-            $users = User::whereIn('id', $userIds)->lockForUpdate()->get()->keyBy('id');
+            $users = User::with('latestLedger')->whereIn('id', $userIds)->lockForUpdate()->get()->keyBy('id');
 
             /** @var User $from */
             $from = $users->get($this->from->id);

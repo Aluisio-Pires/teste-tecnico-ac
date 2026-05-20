@@ -33,7 +33,7 @@ final class ProcessReversalJob implements ShouldQueue
             sort($userIds);
 
             // Lock users
-            $users = User::whereIn('id', $userIds)->lockForUpdate()->get()->keyBy('id');
+            $users = User::with('latestLedger')->whereIn('id', $userIds)->lockForUpdate()->get()->keyBy('id');
 
             $reversalSubledger = Subledger::create([
                 'type' => FinancialOperation::Reversal,

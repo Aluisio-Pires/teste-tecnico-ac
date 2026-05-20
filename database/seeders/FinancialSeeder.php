@@ -25,12 +25,13 @@ final class FinancialSeeder extends Seeder
 
         foreach ($users as $user) {
             // Initial deposit for everyone
-            $depositAction->execute($user, Money::fromDecimal(rand(500, 5000)));
+            $depositAction->execute($user, Money::fromDecimal(fake()->numberBetween(500, 5000)));
 
             // Some random transfers
-            $otherUsers = $users->except($user->id)->random(rand(1, 3));
+            $otherUsers = $users->except($user->id)->random(fake()->numberBetween(1, 3));
             foreach ($otherUsers as $recipient) {
-                $amount = rand(50, 200);
+                $amount = fake()->numberBetween(50, 200);
+                $user->loadMissing('latestLedger');
                 if ($user->balance->toDecimal() > $amount) {
                     $transferAction->execute($user, $recipient, Money::fromDecimal($amount));
                 }

@@ -32,7 +32,7 @@ final class ProcessDepositJob implements ShouldQueue
 
         DB::transaction(function () use ($amount): void {
             // Lock user for update to prevent concurrent balance changes
-            $user = User::where('id', $this->user->id)->lockForUpdate()->firstOrFail();
+            $user = User::with('latestLedger')->where('id', $this->user->id)->lockForUpdate()->firstOrFail();
 
             $subledger = Subledger::create([
                 'type' => FinancialOperation::Deposit,
