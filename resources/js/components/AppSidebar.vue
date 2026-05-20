@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, FolderGit2, LayoutGrid } from 'lucide-vue-next';
+import { ArrowLeftRight, BookOpen, Building, FolderGit2, History, LayoutGrid, SendHorizontal, Wallet } from 'lucide-vue-next';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -15,6 +15,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import * as finance from '@/routes/finance';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -24,6 +25,25 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
 ];
+
+const financeNavItems: NavItem[] = [
+    {
+        title: 'History',
+        href: finance.history(),
+        icon: History,
+    },
+    {
+        title: 'Deposit',
+        href: finance.showDeposit(),
+        icon: Building,
+    },
+    {
+        title: 'Transfer',
+        href: finance.showTransfer(),
+        icon: SendHorizontal,
+    },
+];
+
 
 const footerNavItems: NavItem[] = [
     {
@@ -55,6 +75,7 @@ const footerNavItems: NavItem[] = [
 
         <SidebarContent>
             <NavMain :items="mainNavItems" />
+            <NavMain :items="financeNavItems" title="Finance" />
         </SidebarContent>
 
         <SidebarFooter>
