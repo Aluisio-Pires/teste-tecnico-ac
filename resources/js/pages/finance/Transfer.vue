@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
-import * as finance from '@/routes/finance';
+import { SendHorizontal, Wallet, Eye, EyeOff } from 'lucide-vue-next';
+import { ref } from 'vue';
+import InputError from '@/components/InputError.vue';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import InputError from '@/components/InputError.vue';
-import { SendHorizontal, Wallet, Eye, EyeOff } from 'lucide-vue-next';
+import * as finance from '@/routes/finance';
 
 defineOptions({
     layout: {
@@ -29,7 +29,10 @@ const toggleBalance = () => {
 };
 
 const formatCurrency = (value: number) => {
-    if (!isBalanceVisible.value) return 'R$ ••••••';
+    if (!isBalanceVisible.value) {
+return 'R$ ••••••';
+}
+
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 };
 

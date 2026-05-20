@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { Head, Link, usePage } from '@inertiajs/vue3';
-import { ref } from 'vue';
-import { dashboard, finance as financeRoutes } from '@/routes';
-import * as finance from '@/routes/finance';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Wallet, Eye, EyeOff, Building, SendHorizontal, ArrowRight } from 'lucide-vue-next';
+import { ref } from 'vue';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { dashboard } from '@/routes';
+import * as finance from '@/routes/finance';
 
 interface Ledger {
     id: number;
@@ -17,11 +17,15 @@ interface Ledger {
     subledger: {
         id: number;
         type: string;
+        metadata: any;
+        was_reversed: boolean;
     };
 }
 
 defineProps<{
-    recentLedgers: Ledger[];
+    recentLedgers: {
+        data: Ledger[];
+    };
 }>();
 
 defineOptions({
@@ -44,7 +48,10 @@ const toggleBalance = () => {
 };
 
 const formatCurrency = (value: number) => {
-    if (!isBalanceVisible.value) return 'R$ ••••••';
+    if (!isBalanceVisible.value) {
+return 'R$ ••••••';
+}
+
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 };
 
@@ -143,7 +150,7 @@ const getOperationBadge = (type: string) => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="ledger in recentLedgers" :key="ledger.id">
+                        <TableRow v-for="ledger in recentLedgers.data" :key="ledger.id">
                             <TableCell>{{ formatDate(ledger.created_at) }}</TableCell>
                             <TableCell>
                                 <Badge :class="getOperationBadge(ledger.subledger.type)">
@@ -161,7 +168,7 @@ const getOperationBadge = (type: string) => {
                                 </template>
                             </TableCell>
                         </TableRow>
-                        <TableRow v-if="recentLedgers.length === 0">
+                        <TableRow v-if="recentLedgers.data.length === 0">
                             <TableCell colspan="5" class="h-24 text-center text-muted-foreground">
                                 No recent transactions.
                             </TableCell>

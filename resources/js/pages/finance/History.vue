@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { Head, router, usePage } from '@inertiajs/vue3';
-import * as finance from '@/routes/finance';
+import { ArrowDownLeft, ArrowUpRight, RotateCcw } from 'lucide-vue-next';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ArrowDownLeft, ArrowUpRight, RotateCcw } from 'lucide-vue-next';
+import * as finance from '@/routes/finance';
 
 interface Ledger {
     id: number;
@@ -16,13 +16,7 @@ interface Ledger {
         id: number;
         type: string;
         metadata: any;
-        was_reversed?: boolean;
-        ledgers: {
-            user: {
-                name: string;
-                email: string;
-            };
-        }[];
+        was_reversed: boolean;
     };
 }
 
@@ -59,16 +53,24 @@ const reverseTransaction = (subledgerId: number) => {
 };
 
 const canReverse = (ledger: Ledger) => {
-    if (ledger.subledger.type === 'reversal') return false;
-    if (ledger.subledger.was_reversed) return false;
+    if (ledger.subledger.type === 'reversal') {
+return false;
+}
+
+    if (ledger.subledger.was_reversed) {
+return false;
+}
     
     const user = usePage().props.auth.user;
+
     if (ledger.subledger.type === 'deposit') {
         return Number(ledger.subledger.metadata.user_id) === user.id;
     }
+
     if (ledger.subledger.type === 'transfer') {
         return Number(ledger.subledger.metadata.from_user_id) === user.id;
     }
+
     return false;
 };
 
@@ -164,8 +166,9 @@ const getOperationBadge = (type: string) => {
                         size="sm"
                         :disabled="!link.url || link.active"
                         @click="link.url && router.get(link.url)"
-                        v-html="link.label"
-                    />
+                    >
+                        <span v-html="link.label"></span>
+                    </Button>
                 </div>
             </CardContent>
         </Card>
