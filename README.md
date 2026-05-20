@@ -141,15 +141,35 @@ Foram priorizados mecanismos para proteger o fluxo financeiro e reduzir falhas o
 - separação clara entre criação da operação e seu processamento;
 - base preparada para testes automatizados.
 
-## Qualidade de código
+## Qualidade de código e CI/CD
 
-A qualidade do código foi reforçada com:
+A qualidade do código é garantida por um conjunto de ferramentas de análise estática e formatação, tanto no ambiente de desenvolvimento quanto em pipelines automatizadas.
 
-- **Pint** para padronização;
-- **Larastan** para análise estática;
-- **Rector** para refatorações assistidas;
-- **Pest** e **PHPUnit** para testes;
-- **ESLint** e **Prettier** para consistência no frontend.
+### Comandos de desenvolvimento
+
+Para manter a consistência e qualidade durante o desenvolvimento, utilize os seguintes comandos:
+
+- **Análise Completa (Backend)**:
+  Executa uma verificação completa utilizando **Rector**, **Pint** (estilo de código) e **PHPStan** (análise estática).
+  ```bash
+  ./vendor/bin/sail artisan analyse
+  ```
+
+- **Linting e Formatação (Frontend)**:
+  Executa o **ESLint** e o **Prettier** para garantir a qualidade e o estilo do código Vue/TypeScript.
+  ```bash
+  ./vendor/bin/sail npm run lint
+  ```
+
+### Integração Contínua (GitHub Actions)
+
+O projeto conta com pipelines de **CI/CD** configuradas no GitHub Actions que são disparadas automaticamente a cada `push` ou `pull request`. Isso garante que:
+
+1. **Testes**: Toda a suíte de testes (Pest) seja executada em um ambiente limpo.
+2. **Linting**: O estilo de código (PHP e JS/TS) seja validado.
+3. **Análise Estática**: Nenhuma regressão de tipos ou padrões de código seja introduzida.
+
+A aprovação nessas pipelines é obrigatória para garantir a integridade da aplicação antes de qualquer merge.
 
 ## Ambiente de desenvolvimento
 
@@ -199,8 +219,8 @@ Siga os comandos abaixo para configurar o projeto do zero:
    # Instalar dependências do Node
    ./vendor/bin/sail npm install
 
-   # Iniciar o servidor de desenvolvimento do Vite
-   ./vendor/bin/sail npm run dev
+   # Build do frontend
+   ./vendor/bin/sail npm run build
    ```
 
 ### Serviços essenciais (Filas e Reverb)
