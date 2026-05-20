@@ -157,24 +157,69 @@ O projeto utiliza **Laravel Sail** para simplificar a execução local com Docke
 
 ### Pré-requisitos
 
-- Docker
-- Composer
-- Node.js
-- npm
+Para rodar este projeto, você precisará ter instalado em sua máquina:
 
-### Instalação
+- **Git**: para clonar o repositório.
+- **Docker** e **Docker Compose**: para rodar o ambiente via Laravel Sail.
+- **Composer**: necessário apenas para a instalação inicial das dependências do Sail (ou você pode usar uma imagem Docker temporária para isso).
 
-```bash
-git clone <url-do-repositorio>
-cd <nome-do-projeto>
-cp .env.example .env
-composer install
-npm install
-npm run build
-./vendor/bin/sail up -d
-./vendor/bin/sail artisan key:generate
-./vendor/bin/sail artisan migrate
-```
+### Passo-a-passo para instalação
+
+Siga os comandos abaixo para configurar o projeto do zero:
+
+1. **Clonar o repositório**
+   ```bash
+   git clone git@github.com:Aluisio-Pires/teste-tecnico-ac.git
+   cd teste-tecnico-ac
+   ```
+
+2. **Configurar o ambiente inicial**
+   ```bash
+   # Copiar o arquivo de ambiente
+   cp .env.example .env
+
+   # Instalar dependências do PHP (via Composer local ou Docker)
+   composer install
+
+   # Subir o ambiente Docker (Laravel Sail)
+   ./vendor/bin/sail up -d
+   ```
+
+3. **Configurar a aplicação**
+   ```bash
+   # Gerar chave da aplicação
+   ./vendor/bin/sail artisan key:generate
+
+   # Executar as migrações e seeders
+   ./vendor/bin/sail artisan migrate --seed
+   ```
+
+4. **Configurar o Frontend**
+   ```bash
+   # Instalar dependências do Node
+   ./vendor/bin/sail npm install
+
+   # Iniciar o servidor de desenvolvimento do Vite
+   ./vendor/bin/sail npm run dev
+   ```
+
+### Serviços essenciais (Filas e Reverb)
+
+Como a aplicação processa operações financeiras de forma assíncrona e utiliza WebSockets para atualizações em tempo real, você precisará rodar os seguintes comandos em abas separadas do seu terminal:
+
+- **Processamento de Filas (Queue Worker)**:
+  Essencial para processar depósitos, transferências e reversões.
+  ```bash
+  ./vendor/bin/sail artisan queue:work
+  ```
+
+- **Laravel Reverb (WebSockets)**:
+  Responsável pela comunicação em tempo real com o frontend.
+  ```bash
+  ./vendor/bin/sail artisan reverb:start
+  ```
+
+---
 
 ## Testes
 
@@ -191,7 +236,7 @@ A suíte de testes foi pensada para validar principalmente:
 Execução:
 
 ```bash
-./vendor/bin/sail artisan test
+./vendor/bin/sail artisan test --coverage
 ```
 
 ## Considerações finais
