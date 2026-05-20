@@ -37,10 +37,3 @@ test('financial operation listener logs data', function (): void {
 
     expect(true)->toBeTrue();
 });
-
-test('pulse dashboard is accessible', function (): void {
-    $user = User::factory()->create();
-    $this->actingAs($user);
-
-    $this->get('/pulse')->assertOk();
-});

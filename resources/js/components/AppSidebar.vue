@@ -48,7 +48,7 @@ const financeNavItems: NavItem[] = [
 const footerNavItems: NavItem[] = [
     {
         title: 'Monitoring',
-        href: '/pulse',
+        href: '/telescope',
         icon: Activity,
     },
     {

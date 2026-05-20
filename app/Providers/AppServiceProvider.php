@@ -34,7 +34,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         $this->registerEventListeners();
         $this->configureLogging();
-        $this->configurePulse();
+        $this->configureTelescope();
     }
 
     /**
@@ -60,11 +60,11 @@ final class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Configure Laravel Pulse authorization.
+     * Configure Laravel Telescope authorization.
      */
-    private function configurePulse(): void
+    private function configureTelescope(): void
     {
-        Gate::define('viewPulse', fn (User $user) => true);
+        Gate::define('viewTelescope', fn (User $user) => true);
     }
 
     /**
