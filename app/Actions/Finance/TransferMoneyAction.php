@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Finance;
 
 use App\Enums\FinancialOperation;
+use App\Events\FinancialOperationCompleted;
 use App\Models\Ledger;
 use App\Models\Subledger;
 use App\Models\User;
@@ -67,6 +68,8 @@ final class TransferMoneyAction
                 'amount' => $amount,
                 'balance_after' => $to->balance->add($amount),
             ]);
+
+            FinancialOperationCompleted::dispatch($subledger);
         });
     }
 }

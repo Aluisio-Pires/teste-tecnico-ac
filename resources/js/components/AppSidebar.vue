@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Building, FolderGit2, History, LayoutGrid, SendHorizontal } from 'lucide-vue-next';
+import { Activity, BookOpen, Building, FolderGit2, History, LayoutGrid, SendHorizontal } from 'lucide-vue-next';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -46,6 +46,11 @@ const financeNavItems: NavItem[] = [
 
 
 const footerNavItems: NavItem[] = [
+    {
+        title: 'Monitoring',
+        href: '/pulse',
+        icon: Activity,
+    },
     {
         title: 'Repository',
         href: 'https://github.com/laravel/vue-starter-kit',

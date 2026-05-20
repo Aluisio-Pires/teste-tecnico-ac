@@ -4,9 +4,15 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Events\FinancialOperationCompleted;
+use App\Listeners\LogFinancialOperation;
+use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -26,6 +32,9 @@ final class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->registerEventListeners();
+        $this->configureLogging();
+        $this->configurePulse();
     }
 
     /**
@@ -48,5 +57,35 @@ final class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null,
         );
+    }
+
+    /**
+     * Configure Laravel Pulse authorization.
+     */
+    private function configurePulse(): void
+    {
+        Gate::define('viewPulse', fn (User $user) => true);
+    }
+
+    /**
+     * Register application event listeners.
+     */
+    private function registerEventListeners(): void
+    {
+        Event::listen(
+            FinancialOperationCompleted::class,
+            LogFinancialOperation::class,
+        );
+    }
+
+    /**
+     * Configure structured logging with global context.
+     */
+    private function configureLogging(): void
+    {
+        Log::shareContext([
+            'environment' => app()->environment(),
+            'user_id' => auth()->id(),
+        ]);
     }
 }

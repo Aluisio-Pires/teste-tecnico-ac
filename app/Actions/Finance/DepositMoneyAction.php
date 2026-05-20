@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Finance;
 
 use App\Enums\FinancialOperation;
+use App\Events\FinancialOperationCompleted;
 use App\Models\Ledger;
 use App\Models\Subledger;
 use App\Models\User;
@@ -27,12 +28,16 @@ final class DepositMoneyAction
                 ],
             ]);
 
-            return Ledger::create([
+            $ledger = Ledger::create([
                 'subledger_id' => $subledger->id,
                 'user_id' => $user->id,
                 'amount' => $amount,
                 'balance_after' => $user->balance->add($amount),
             ]);
+
+            FinancialOperationCompleted::dispatch($subledger);
+
+            return $ledger;
         });
     }
 }

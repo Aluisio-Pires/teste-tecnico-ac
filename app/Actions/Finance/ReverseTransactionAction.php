@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Finance;
 
 use App\Enums\FinancialOperation;
+use App\Events\FinancialOperationCompleted;
 use App\Models\Ledger;
 use App\Models\Subledger;
 use App\Models\User;
@@ -57,6 +58,8 @@ final class ReverseTransactionAction
                     'balance_after' => $user->balance->add($reverseAmount),
                 ]);
             }
+
+            FinancialOperationCompleted::dispatch($reversalSubledger);
         });
     }
 }
