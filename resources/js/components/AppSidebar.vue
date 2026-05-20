@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
+import { usePage } from '@inertiajs/vue3';
 import { Activity, Building, History, LayoutGrid, SendHorizontal } from 'lucide-vue-next';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
@@ -17,6 +18,9 @@ import {
 import { dashboard } from '@/routes';
 import * as finance from '@/routes/finance';
 import type { NavItem } from '@/types';
+
+const page = usePage();
+const permissions = page.props.auth.user?.permissions ?? [];
 
 const mainNavItems: NavItem[] = [
     {
@@ -46,11 +50,13 @@ const financeNavItems: NavItem[] = [
 
 
 const footerNavItems: NavItem[] = [
-    {
-        title: 'Monitoring',
-        href: '/telescope',
-        icon: Activity,
-    },
+    ...(permissions.includes('view monitoring') ? [
+        {
+            title: 'Monitoring',
+            href: '/telescope',
+            icon: Activity,
+        },
+    ] : []),
 ];
 </script>
 
