@@ -6,6 +6,10 @@ export function useRealTimeUpdates() {
     const userId = computed(() => page.props.auth.user?.id);
 
     const setupListener = (id: number) => {
+        if (typeof window === 'undefined' || !window.Echo) {
+            return;
+        }
+
         console.log(`[Echo] Setting up private channel for user: ${id}`);
         
         window.Echo.private(`App.Models.User.${id}`)
@@ -22,6 +26,10 @@ export function useRealTimeUpdates() {
     };
 
     const stopListener = (id: number) => {
+        if (typeof window === 'undefined' || !window.Echo) {
+            return;
+        }
+
         console.log(`[Echo] Leaving private channel for user: ${id}`);
         window.Echo.leave(`App.Models.User.${id}`);
     };

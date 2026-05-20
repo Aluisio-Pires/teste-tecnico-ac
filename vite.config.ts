@@ -31,6 +31,14 @@ export default defineConfig({
             formVariants: true,
         }),
     ],
+    server: {
+        host: '0.0.0.0',
+        port: 5172,
+        strictPort: true,
+        hmr: {
+            host: 'localhost',
+        },
+    },
     build: {
         chunkSizeWarningLimit: 1000,
         rollupOptions: {
