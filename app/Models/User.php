@@ -8,8 +8,10 @@ namespace App\Models;
 use App\ValueObjects\Money;
 use Carbon\Carbon;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -29,18 +31,17 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property-read string $remember_token
  * @property-read Carbon $created_at
  * @property-read Carbon $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Ledger> $ledgers
+ * @property-read Collection<int, Ledger> $ledgers
  * @property-read Ledger|null $latestLedger
  * @property-read Money $balance
  */
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
+#[Appends(['balance'])]
 final class User extends Authenticatable implements PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
-
-    protected $appends = ['balance'];
 
     /**
      * @return HasMany<Ledger, $this>

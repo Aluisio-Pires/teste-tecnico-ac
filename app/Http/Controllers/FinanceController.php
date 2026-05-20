@@ -7,8 +7,10 @@ namespace App\Http\Controllers;
 use App\Actions\Finance\DepositMoneyAction;
 use App\Actions\Finance\ReverseTransactionAction;
 use App\Actions\Finance\TransferMoneyAction;
+use App\Enums\FinancialOperation;
 use App\Http\Requests\Finance\DepositRequest;
 use App\Http\Requests\Finance\TransferRequest;
+use App\Models\Ledger;
 use App\Models\Subledger;
 use App\Models\User;
 use App\ValueObjects\Money;
@@ -31,9 +33,12 @@ final class FinanceController extends Controller
             ->take(5)
             ->get()
             ->map(function ($ledger) {
-                $ledger->subledger->was_reversed = Subledger::where('type', \App\Enums\FinancialOperation::Reversal)
+                /** @var Ledger $ledger */
+                $ledger->subledger->was_reversed = Subledger::query()
+                    ->where('type', FinancialOperation::Reversal)
                     ->whereJsonContains('metadata->original_subledger_id', $ledger->subledger_id)
                     ->exists();
+
                 return $ledger;
             });
 
@@ -52,9 +57,12 @@ final class FinanceController extends Controller
             ->latest()
             ->paginate(10)
             ->through(function ($ledger) {
-                $ledger->subledger->was_reversed = Subledger::where('type', \App\Enums\FinancialOperation::Reversal)
+                /** @var Ledger $ledger */
+                $ledger->subledger->was_reversed = Subledger::query()
+                    ->where('type', FinancialOperation::Reversal)
                     ->whereJsonContains('metadata->original_subledger_id', $ledger->subledger_id)
                     ->exists();
+
                 return $ledger;
             });
 
@@ -77,10 +85,13 @@ final class FinanceController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
-        /** @var float|int|string $amount */
-        $amount = $request->validated('amount');
+        $amount = $request->integer('amount');
 
-        $action->execute($user, Money::fromDecimal($amount));
+        if (!is_numeric($amount)) {
+            return back()->withErrors(['amount' => 'Invalid amount.']);
+        }
+
+        $action->execute($user, Money::fromDecimal((float) $amount));
 
         return back()->with('status', 'Deposit successful!');
     }
@@ -89,15 +100,17 @@ final class FinanceController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
-        /** @var string $email */
-        $email = $request->validated('email');
-        /** @var float|int|string $amount */
-        $amount = $request->validated('amount');
+        $email = $request->string('email')->value();
+        $amount = $request->string('amount')->value();
 
-        $toUser = User::where('email', $email)->firstOrFail();
+        if (!is_string($email) || !is_numeric($amount)) {
+            return back()->withErrors(['amount' => 'Invalid data provided.']);
+        }
+
+        $toUser = User::query()->where('email', $email)->firstOrFail();
 
         try {
-            $action->execute($user, $toUser, Money::fromDecimal($amount));
+            $action->execute($user, $toUser, Money::fromDecimal((float) $amount));
         } catch (InvalidArgumentException $e) {
             return back()->withErrors(['amount' => $e->getMessage()]);
         }
@@ -110,18 +123,19 @@ final class FinanceController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        // Check if the user is the originator of the transaction
-        // For transfers, the originator is the one who was debited (from_user_id)
-        // For deposits, the originator is the user who made the deposit
         $isOriginator = false;
 
-        if ($subledger->type->value === 'deposit') {
-            $isOriginator = (int) ($subledger->metadata['user_id'] ?? 0) === $user->id;
-        } elseif ($subledger->type->value === 'transfer') {
-            $isOriginator = (int) ($subledger->metadata['from_user_id'] ?? 0) === $user->id;
+        if ($subledger->type === FinancialOperation::Deposit) {
+            $metadata = $subledger->metadata ?? [];
+            $originatorId = $metadata['user_id'] ?? 0;
+            $isOriginator = (is_numeric($originatorId) ? (int) $originatorId : 0) === $user->id;
+        } elseif ($subledger->type === FinancialOperation::Transfer) {
+            $metadata = $subledger->metadata ?? [];
+            $originatorId = $metadata['from_user_id'] ?? 0;
+            $isOriginator = (is_numeric($originatorId) ? (int) $originatorId : 0) === $user->id;
         }
 
-        if (! $isOriginator) {
+        if (!$isOriginator) {
             return back()->withErrors(['error' => 'You can only reverse transactions you originated.']);
         }
 

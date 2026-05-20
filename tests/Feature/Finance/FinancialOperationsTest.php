@@ -79,20 +79,20 @@ test('cannot transfer more than balance', function (): void {
 test('user cannot reverse transaction they did not originate', function (): void {
     $from = User::factory()->create();
     $to = User::factory()->create();
-    
+
     (new DepositMoneyAction())->execute($from, Money::fromDecimal(100));
     (new TransferMoneyAction())->execute($from, $to, Money::fromDecimal(50));
-    
+
     $subledger = Subledger::where('type', FinancialOperation::Transfer)->first();
 
     $this->actingAs($to);
     $response = $this->post(route('finance.reverse', $subledger));
 
     $response->assertSessionHasErrors(['error' => 'You can only reverse transactions you originated.']);
-    
+
     $from->refresh();
     $to->refresh();
-    
+
     expect($from->balance->toDecimal())->toBe(50.0)
         ->and($to->balance->toDecimal())->toBe(50.0);
 });
