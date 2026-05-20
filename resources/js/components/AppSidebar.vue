@@ -51,16 +51,6 @@ const footerNavItems: NavItem[] = [
         href: '/telescope',
         icon: Activity,
     },
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
-    },
 ];
 </script>
 
