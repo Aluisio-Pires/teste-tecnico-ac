@@ -88,7 +88,7 @@ test('user cannot reverse transaction they did not originate', function (): void
     $this->actingAs($to);
     $response = $this->post(route('finance.reverse', $subledger));
 
-    $response->assertSessionHasErrors(['error' => 'You can only reverse transactions you originated.']);
+    $response->assertForbidden();
 
     $from->refresh();
     $to->refresh();

@@ -7,8 +7,10 @@ namespace App\Models;
 use App\Casts\MoneyCast;
 use App\Enums\FinancialOperation;
 use App\ValueObjects\Money;
+use Database\Factories\SubledgerFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
@@ -26,6 +28,9 @@ use Illuminate\Support\Carbon;
 #[Fillable(['type', 'amount', 'metadata'])]
 final class Subledger extends Model
 {
+    /** @use HasFactory<SubledgerFactory> */
+    use HasFactory;
+
     protected $casts = [
         'type' => FinancialOperation::class,
         'amount' => MoneyCast::class,
