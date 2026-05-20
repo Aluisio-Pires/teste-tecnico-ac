@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { dashboard, login, register } from '@/routes';
-import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import {
     Coins,
     FileText,
@@ -14,6 +12,8 @@ import {
     Database,
     Lock
 } from 'lucide-vue-next';
+import AppLogoIcon from '@/components/AppLogoIcon.vue';
+import { dashboard, login, register } from '@/routes';
 
 defineProps<{
     auth: {
