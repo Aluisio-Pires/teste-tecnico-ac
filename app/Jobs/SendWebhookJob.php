@@ -20,8 +20,12 @@ final class SendWebhookJob implements ShouldQueue
 
     public int $tries = 3;
 
+    /** @var array<int, int> */
     public array $backoff = [60, 300, 600];
 
+    /**
+     * @param  array<string, mixed>  $payload
+     */
     public function __construct(
         public Webhook $webhook,
         public array $payload,

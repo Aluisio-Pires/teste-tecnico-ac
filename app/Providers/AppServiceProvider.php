@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Events\FinancialOperationCompleted;
-use App\Listeners\LogFinancialOperation;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
@@ -72,15 +70,7 @@ final class AppServiceProvider extends ServiceProvider
      */
     private function registerEventListeners(): void
     {
-        Event::listen(
-            FinancialOperationCompleted::class,
-            LogFinancialOperation::class,
-        );
-
-        Event::listen(
-            FinancialOperationCompleted::class,
-            \App\Listeners\DispatchWebhooks::class,
-        );
+        // Event discovery will handle this
     }
 
     /**

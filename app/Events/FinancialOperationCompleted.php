@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Events;
 
+use App\Models\Ledger;
 use App\Models\Subledger;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -22,13 +24,16 @@ final class FinancialOperationCompleted implements ShouldBroadcast
     /**
      * Get the channels the event should broadcast on.
      *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
+     * @return array<int, Channel>
      */
     public function broadcastOn(): array
     {
-        return $this->subledger->ledgers->map(function ($ledger) {
+        /** @var array<int, Channel> $channels */
+        $channels = $this->subledger->ledgers->map(function (Ledger $ledger): PrivateChannel {
             return new PrivateChannel("App.Models.User.{$ledger->user_id}");
-        })->toArray();
+        })->all();
+
+        return $channels;
     }
 
     /**
