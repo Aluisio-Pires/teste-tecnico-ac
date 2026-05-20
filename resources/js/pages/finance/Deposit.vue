@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { Building, Wallet, Eye, EyeOff, CheckCircle2, Loader2 } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -21,7 +21,7 @@ defineOptions({
 });
 
 const page = usePage();
-const user = page.props.auth.user;
+const user = computed(() => page.props.auth.user);
 const isBalanceVisible = ref(true);
 const showSuccess = ref(false);
 
@@ -70,7 +70,9 @@ const submit = () => {
                 </div>
             </CardHeader>
             <CardContent>
-                <div class="text-2xl font-bold">{{ formatCurrency(user.balance) }}</div>
+                <Transition name="balance-bounce" mode="out-in">
+                    <div :key="user.balance" class="text-2xl font-bold">{{ formatCurrency(user.balance) }}</div>
+                </Transition>
             </CardContent>
         </Card>
 
@@ -125,3 +127,15 @@ const submit = () => {
         </Card>
     </div>
 </template>
+
+<style scoped>
+.balance-bounce-enter-active {
+    animation: bounce-in 0.5s;
+}
+
+@keyframes bounce-in {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); color: #16a34a; }
+    100% { transform: scale(1); }
+}
+</style>

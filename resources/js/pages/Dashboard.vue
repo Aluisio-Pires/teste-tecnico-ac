@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { Wallet, Eye, EyeOff, Building, SendHorizontal, ArrowRight } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -40,7 +40,7 @@ defineOptions({
 });
 
 const page = usePage();
-const user = page.props.auth.user;
+const user = computed(() => page.props.auth.user);
 const isBalanceVisible = ref(true);
 
 const toggleBalance = () => {
@@ -49,8 +49,8 @@ const toggleBalance = () => {
 
 const formatCurrency = (value: number) => {
     if (!isBalanceVisible.value) {
-return 'R$ ••••••';
-}
+        return 'R$ ••••••';
+    }
 
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 };
@@ -91,9 +91,16 @@ const getOperationBadge = (type: string) => {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div class="text-3xl font-bold">{{ formatCurrency(user.balance) }}</div>
-                    <p class="text-xs text-muted-foreground">Updated in real-time</p>
-                    
+                    <Transition name="balance-bounce" mode="out-in">
+                        <div :key="user.balance" class="text-3xl font-bold">{{ formatCurrency(user.balance) }}</div>
+                    </Transition>
+                    <p class="text-xs text-muted-foreground flex items-center gap-1">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                        </span>
+                        Real-time updates active
+                    </p>                    
                     <div class="mt-6 flex gap-3">
                         <Button as-child variant="default" class="flex-1">
                             <Link :href="finance.showDeposit()">
@@ -149,8 +156,12 @@ const getOperationBadge = (type: string) => {
                             <TableHead>Details</TableHead>
                         </TableRow>
                     </TableHeader>
-                    <TableBody>
-                        <TableRow v-for="ledger in recentLedgers.data" :key="ledger.id">
+                    <TransitionGroup 
+                        tag="tbody" 
+                        name="list" 
+                        class="relative"
+                    >
+                        <TableRow v-for="ledger in recentLedgers.data" :key="ledger.id" class="transition-all duration-500">
                             <TableCell>{{ formatDate(ledger.created_at) }}</TableCell>
                             <TableCell>
                                 <Badge :class="getOperationBadge(ledger.subledger.type)">
@@ -168,7 +179,9 @@ const getOperationBadge = (type: string) => {
                                 </template>
                             </TableCell>
                         </TableRow>
-                        <TableRow v-if="recentLedgers.data.length === 0">
+                    </TransitionGroup>
+                    <TableBody v-if="recentLedgers.data.length === 0">
+                        <TableRow>
                             <TableCell colspan="5" class="h-24 text-center text-muted-foreground">
                                 No recent transactions.
                             </TableCell>
@@ -179,3 +192,28 @@ const getOperationBadge = (type: string) => {
         </Card>
     </div>
 </template>
+
+<style scoped>
+.list-enter-active,
+.list-leave-active {
+    transition: all 0.5s ease;
+}
+.list-enter-from,
+.list-leave-to {
+    opacity: 0;
+    transform: translateY(10px);
+}
+.list-move {
+    transition: transform 0.5s ease;
+}
+
+.balance-bounce-enter-active {
+    animation: bounce-in 0.5s;
+}
+
+@keyframes bounce-in {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); color: #16a34a; }
+    100% { transform: scale(1); }
+}
+</style>

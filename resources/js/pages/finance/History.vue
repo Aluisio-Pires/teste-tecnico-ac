@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, router, usePage } from '@inertiajs/vue3';
-import { ArrowDownLeft, ArrowUpRight, RotateCcw } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { ArrowDownLeft, ArrowUpRight, RotateCcw, Eye, EyeOff } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -46,7 +46,19 @@ defineOptions({
     },
 });
 
+const page = usePage();
+const user = computed(() => page.props.auth.user);
+const isBalanceVisible = ref(true);
+
+const toggleBalance = () => {
+    isBalanceVisible.value = !isBalanceVisible.value;
+};
+
 const formatCurrency = (value: number) => {
+    if (!isBalanceVisible.value) {
+        return 'R$ ••••••';
+    }
+
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 };
 
@@ -62,21 +74,19 @@ const reverseTransaction = (subledgerId: number) => {
 
 const canReverse = (ledger: Ledger) => {
     if (ledger.subledger.type === 'reversal') {
-return false;
-}
+        return false;
+    }
 
     if (ledger.subledger.was_reversed) {
-return false;
-}
+        return false;
+    }
     
-    const user = usePage().props.auth.user;
-
     if (ledger.subledger.type === 'deposit') {
-        return Number(ledger.subledger.metadata.user_id) === user.id;
+        return Number(ledger.subledger.metadata.user_id) === user.value.id;
     }
 
     if (ledger.subledger.type === 'transfer') {
-        return Number(ledger.subledger.metadata.from_user_id) === user.id;
+        return Number(ledger.subledger.metadata.from_user_id) === user.value.id;
     }
 
     return false;
@@ -100,6 +110,15 @@ const getOperationBadge = (type: string) => {
     <Head title="Transaction History" />
 
     <div class="flex h-full flex-1 flex-col gap-4 p-4">
+        <div class="flex items-center justify-end gap-2 px-2">
+            <span class="text-sm font-medium text-muted-foreground">My Balance:</span>
+            <span class="font-bold">{{ formatCurrency(user.balance) }}</span>
+            <Button variant="ghost" size="icon" @click="toggleBalance" class="h-6 w-6">
+                <Eye v-if="!isBalanceVisible" class="h-3 w-3" />
+                <EyeOff v-else class="h-3 w-3" />
+            </Button>
+        </div>
+
         <Card>
             <CardHeader>
                 <CardTitle>Transaction History</CardTitle>
@@ -117,8 +136,8 @@ const getOperationBadge = (type: string) => {
                             <TableHead class="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
-                    <TableBody>
-                        <TableRow v-for="ledger in ledgers.data" :key="ledger.id">
+                    <TransitionGroup tag="tbody" name="list">
+                        <TableRow v-for="ledger in ledgers.data" :key="ledger.id" class="transition-all duration-500">
                             <TableCell class="whitespace-nowrap">{{ formatDate(ledger.created_at) }}</TableCell>
                             <TableCell>
                                 <Badge :class="getOperationBadge(ledger.subledger.type)">
@@ -157,7 +176,9 @@ const getOperationBadge = (type: string) => {
                                 </Button>
                             </TableCell>
                         </TableRow>
-                        <TableRow v-if="ledgers.data.length === 0">
+                    </TransitionGroup>
+                    <TableBody v-if="ledgers.data.length === 0">
+                        <TableRow>
                             <TableCell colspan="6" class="h-24 text-center">
                                 No transactions found.
                             </TableCell>
@@ -182,3 +203,18 @@ const getOperationBadge = (type: string) => {
         </Card>
     </div>
 </template>
+
+<style scoped>
+.list-enter-active,
+.list-leave-active {
+    transition: all 0.5s ease;
+}
+.list-enter-from,
+.list-leave-to {
+    opacity: 0;
+    transform: translateY(10px);
+}
+.list-move {
+    transition: transform 0.5s ease;
+}
+</style>

@@ -76,6 +76,11 @@ final class AppServiceProvider extends ServiceProvider
             FinancialOperationCompleted::class,
             LogFinancialOperation::class,
         );
+
+        Event::listen(
+            FinancialOperationCompleted::class,
+            \App\Listeners\DispatchWebhooks::class,
+        );
     }
 
     /**
