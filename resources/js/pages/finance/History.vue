@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { ArrowDownLeft, ArrowUpRight, RotateCcw } from 'lucide-vue-next';
+import { computed } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -20,12 +21,19 @@ interface Ledger {
     };
 }
 
-defineProps<{
+const props = defineProps<{
     ledgers: {
         data: Ledger[];
-        links: any[];
+        links?: any[];
+        meta?: {
+            links: any[];
+        };
     };
 }>();
+
+const paginationLinks = computed(() => {
+    return props.ledgers.meta?.links || props.ledgers.links || [];
+});
 
 defineOptions({
     layout: {
@@ -160,7 +168,7 @@ const getOperationBadge = (type: string) => {
                 <!-- Simple Pagination (just for show, actual logic would need more) -->
                 <div class="mt-4 flex items-center justify-end space-x-2">
                     <Button
-                        v-for="link in ledgers.links"
+                        v-for="link in paginationLinks"
                         :key="link.label"
                         variant="outline"
                         size="sm"
